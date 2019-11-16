@@ -1,0 +1,36 @@
+[user]
+  name = Jonas Mauer
+  email = jam@kabelmail.net
+[core]
+  editor = vim
+  excludesfile = ~/.gitignore
+  autocrlf = input
+[color]
+  branch = auto
+  diff = auto
+  interactive = auto
+  status = auto
+[web]
+  browser = firefox
+[credential]
+  helper = {{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}
+[push]
+  default = simple
+[merge]
+  tool = vscode
+[mergetool "vscode"]
+  cmd = code --wait $MERGED
+[diff]
+  tool = vscode
+[difftool "vscode"]
+  cmd = code --wait --diff $LOCAL $REMOTE
+[difftool]
+  prompt = false
+[alias]
+  c   = commit
+  ca  = commit -a
+  cm  = commit -m
+  cam = commit -am
+  d   = diff
+  dc  = diff --cached
+  l   = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit

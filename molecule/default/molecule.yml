@@ -1,0 +1,43 @@
+---
+# role: ansible-role-git
+# file: molecule/default/molecule.yml
+
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+  options:
+    config-file: molecule/shared/yamllint.yml
+platforms:
+  - name: git-default
+    image: ${MOLECULE_DIST:-"jam82/ubuntu-molecule:18.04"}
+    command: ${MOLECULE_DOCKER_CMD:-""}
+    pre_build_image: True
+    privileged: True
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+provisioner:
+  name: ansible
+  log: True
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../shared/playbook.yml
+  inventory:
+    group_vars:
+      all:
+        role_git_enabled: True
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  env:
+    PYTHONWARNINGS: "ignore"
+  directory: ../tests
+  options:
+    v: True
+    sudo: True
+  lint:
+    name: flake8

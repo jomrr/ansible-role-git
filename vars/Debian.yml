@@ -1,0 +1,11 @@
+---
+# role: ansible-role-git
+# file: vars/Debian.yml
+
+git_packages:
+  - git
+  - libsecret-1-0
+  - libsecret-1-dev
+
+git_keyring_helper_path: "/usr/share/doc/git/contrib/credential/libsecret"
+git_keyring_helper_file: "git-credential-libsecret"
