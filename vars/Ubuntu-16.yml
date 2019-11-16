@@ -1,0 +1,12 @@
+---
+# role: ansible-role-git
+# file: vars/Ubuntu-16.yml
+
+git_packages:
+  - git
+  - libsecret-1-0
+  - libsecret-1-dev
+  - libgnome-keyring-dev
+
+git_keyring_helper_path: "/usr/share/doc/git/contrib/credential/gnome-keyring"
+git_keyring_helper_file: "git-credential-gnome-keyring"
