@@ -138,7 +138,7 @@ provisioner:
   inventory:
     group_vars:
       all:
-        role_git_enabled: True
+        git_enabled: True
 scenario:
   name: all
   test_sequence:

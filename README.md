@@ -17,7 +17,7 @@ Variables for this
 
 | variable | default value in defaults/main.yml | description |
 | -------- | ---------------------------------- | ----------- |
-| role_git_enabled | False | determine whether role is enabled (True) or not (False) |
+| git_enabled | False | determine whether role is enabled (True) or not (False) |
 | git_name | "" | name in gitconfig |
 | git_email | "" | email in gitconfig |
 
@@ -34,7 +34,7 @@ None.
 
 - hosts: git_servers
   vars:
-    role_git_enabled: True
+    git_enabled: True
     git_name: Jonas Mauer
     git_email: jam@example.com
   roles:
