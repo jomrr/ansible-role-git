@@ -1,0 +1,10 @@
+---
+# role: ansible-role-git
+# file: vars/Archlinux.yml
+
+git_packages:
+  - git
+  - libgnome-keyring
+
+git_keyring_helper_path: "/usr/libexec/git-core"
+git_keyring_helper_file: "git-credential-libsecret"
