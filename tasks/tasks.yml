@@ -2,10 +2,10 @@
 # role: ansible-role-git
 # file: tasks/tasks.yml
 
-- name: Set os_family dependent variables
+- name: "Set os_family dependent variables"
   include_vars: '{{ ansible_os_family }}.yml'
 
-- name: Set distribution dependent variables
+- name: "Set distribution dependent variables"
   include_vars: '{{ vars_file }}'
   with_first_found:
     - files:
@@ -16,12 +16,12 @@
   loop_control:
     loop_var: vars_file
 
-- name: Install packages for ansible-role-git
+- name: "Install packages for ansible-role-git"
   package:
     name: "{{ git_packages }}"
     state: present
 
-- name: Make gnome-keyring-support
+- name: "Make gnome-keyring-support"
   shell: set -o pipefail && sudo make
   args:
     chdir: "{{ git_keyring_helper_path }}/"
@@ -29,14 +29,14 @@
     executable: /bin/bash
   when: not ansible_distribution == 'RedHat'
 
-- name: Set permissions for gnome-keyring-support
+- name: "Set permissions for gnome-keyring-support"
   file:
     path: "{{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}"
     mode: '755'
     modification_time: preserve
     access_time: preserve
 
-- name: Configure git for current user ({{ lookup('env','USER') }})
+- name: "Configure git for current user ({{ ansible_env.PWD }})"
   become: False
   template:
     src: gitconfig.j2
