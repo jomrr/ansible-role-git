@@ -28,6 +28,7 @@
     creates: "{{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}"
     executable: /bin/bash
   when: not ansible_distribution == 'RedHat'
+    and git_keyring_helper_file is defined
 
 - name: "Set permissions for gnome-keyring-support"
   file:
@@ -35,6 +36,7 @@
     mode: '755'
     modification_time: preserve
     access_time: preserve
+  when: git_keyring_helper_file is defined
 
 - name: "Configure git for current user ({{ ansible_env.PWD }})"
   become: False
@@ -42,3 +44,4 @@
     src: gitconfig.j2
     dest: "{{ ansible_env.PWD }}/.gitconfig"
     mode: '600'
+  when: git_name is defined and git_mail is defined

@@ -1,0 +1,6 @@
+---
+# role: ansible-role-git
+# file: vars/Archlinux.yml
+
+git_packages:
+  - git
