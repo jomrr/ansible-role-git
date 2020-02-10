@@ -37,9 +37,8 @@
     access_time: preserve
 
 - name: Configure git for current user ({{ lookup('env','USER') }})
-  become: true
-  become_user: "{{ ansible_user }}"
+  become: False
   template:
     src: gitconfig.j2
-    dest: "{{ lookup('env','HOME') }}/.gitconfig"
+    dest: "{{ ansible_env.PWD }}/.gitconfig"
     mode: '600'
