@@ -18,11 +18,8 @@
 
 - name: Install packages for ansible-role-git
   package:
-    name: "{{ git_package }}"
+    name: "{{ git_packages }}"
     state: present
-  loop: "{{ git_packages }}"
-  loop_control:
-    loop_var: git_package
 
 - name: Make gnome-keyring-support
   shell: set -o pipefail && sudo make
@@ -40,7 +37,8 @@
     access_time: preserve
 
 - name: Configure git for current user ({{ lookup('env','USER') }})
-  become: False
+  become: true
+  become_user: "{{ ansible_user }}"
   template:
     src: gitconfig.j2
     dest: "{{ lookup('env','HOME') }}/.gitconfig"
