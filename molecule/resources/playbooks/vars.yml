@@ -1,0 +1,6 @@
+---
+# role: ansible-role-git
+# file: molecule/resources/playbooks/vars.yml
+
+common_role_enabled: True
+git_role_enabled: True

@@ -1,9 +1,21 @@
 import os
 
+import pytest
+
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+
+
+@pytest.fixture
+def get_vars(host):
+    all_vars = host.ansible.get_variables()
+    return all_vars
+
+
+def test_role_var(host, get_vars):
+    assert get_vars['git_role_enabled'] is True
 
 
 def test_system_info(host):

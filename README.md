@@ -1,25 +1,36 @@
 # ansible-role-git
 
-Ansible role for setting up git with gnome keyring support.
+**Ansible role for setting up git with libsecret(keyring) support.**
 
 ## Supported Platforms
 
-* Arch Linux
-* Ubuntu 18.04
+- Alpine 3.11
+- Archlinux
+- CentOS 8
+- Debian 9, 10
+- Fedora 31
+- Ubuntu 18.04, 20.04
 
 ## Requirements
 
-Ansible 2.7 or higher is recommended.
+Ansible 2.9 or higher is recommended.
 
 ## Variables
 
-Variables for this
+Variables and defaults for this role:
 
-| variable | default value in defaults/main.yml | description |
-| -------- | ---------------------------------- | ----------- |
-| git_enabled | False | determine whether role is enabled (True) or not (False) |
-| git_name | "" | name in gitconfig |
-| git_email | "" | email in gitconfig |
+```yaml
+---
+# role: ansible-role-git
+# file: defaults/main.yml
+
+# The role is disabled by default, so you do not get in trouble.
+# Checked in tasks/main.yml which includes tasks.yml if enabled.
+git_enabled: False
+
+git_name: ""
+git_email: ""
+```
 
 ## Dependencies
 
@@ -35,20 +46,21 @@ None.
 - hosts: git_servers
   vars:
     git_enabled: True
-    git_name: Jonas Mauer
-    git_email: jam@example.com
+    git_name: jam82
+    git_email: jam82@yourdomain.tld
   roles:
     - role: ansible-role-git
 ```
 
 ## License and Author
 
-- Author:: Jonas Mauer (<jam@kabelmail.net>)
-- Copyright:: 2019, Jonas Mauer
+- Author:: [jam82](https://github.com/jam82/)
+- Copyright:: 2020, [jam82](https://github.com/jam82/)
 
-Licensed under MIT License;
-See LICENSE file in repository.
+Licensed under [MIT License](https://opensource.org/licenses/MIT).
+See [LICENSE](https://github.com/jam82/ansible-role-git/blob/master/LICENSE) file in repository.
 
 ## References
 
-[Stackoverflow](https://stackoverflow.com/questions/13385690/how-to-use-git-with-gnome-keyring-integration)
+- [ArchWiki - GNOME/Keyring](https://wiki.archlinux.org/index.php/GNOME/Keyring)
+- [Stackoverflow](https://stackoverflow.com/questions/13385690/how-to-use-git-with-gnome-keyring-integration)

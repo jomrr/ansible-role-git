@@ -4,48 +4,47 @@
 
 dependency:
   name: galaxy
+  options:
+    role-file: requirements.yml
 driver:
   name: vagrant
   provider:
     name: libvirt
     type: libvirt
     options:
-      memory: 1024
-      cpus: 1
-lint:
-  name: yamllint
-  options:
-    config-file: molecule/shared/yamllint.yml
+      memory: 2048
+      cpus: 2
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
 platforms:
   - name: git-arch
     box: "archlinux/archlinux"
-  - name: git-centos7
-    box: "centos/7"
+  - name: git-centos8
+    box: "centos/8"
   - name: git-debian10
     box: "debian/buster64"
+  - name: git-fedora31
+    box: "fedora/31-cloud-base"
   - name: git-ubuntu1804
     box: "generic/ubuntu1804"
 provisioner:
   name: ansible
   log: True
-  lint:
-    name: ansible-lint
   playbooks:
-    prepare: ../shared/prepare.yml
-    converge: ../shared/playbook.yml
+    prepare: ../resources/playbooks/prepare.yml
+    converge: ../resources/playbooks/converge.yml
   inventory:
     group_vars:
       all:
-        git_enabled: True
-scenario:
-  name: kvm
+        git_role_enabled: True
 verifier:
   name: testinfra
   env:
     PYTHONWARNINGS: "ignore"
-  directory: ../tests
+  directory: ../resources/tests
   options:
     v: True
     sudo: True
-  lint:
-    name: flake8
