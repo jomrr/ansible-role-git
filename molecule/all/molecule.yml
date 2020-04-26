@@ -4,159 +4,233 @@
 
 dependency:
   name: galaxy
+  options:
+    role-file: requirements.yml
 driver:
   name: docker
-lint:
-  name: yamllint
-  options:
-    config-file: molecule/shared/yamllint.yml
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
 platforms:
-  - name: git-amazon
-    image: "jam82/amazon-molecule:latest"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-alpine311
+    image: "jam82/molecule-alpine:3.11"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
+  - name: git-alpine
+    image: "jam82/molecule-alpine:latest"
+    override_command: False
+    pre_build_image: True
+    privileged: True
+    tmpfs:
+      - /tmp
+      - /run
+  - name: git-amazonlinux
+    image: "jam82/molecule-amazonlinux:latest"
+    override_command: False
+    pre_build_image: True
+    privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-arch
-    image: "jam82/arch-molecule:latest"
-    command: "/usr/lib/systemd/systemd"
+    image: "jam82/molecule-archlinux:latest"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-centos6
-    image: "jam82/centos-molecule:6"
-    command: "/sbin/init"
+    image: "jam82/molecule-centos:6"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
   - name: git-centos7
-    image: "jam82/centos-molecule:7"
-    command: "/usr/lib/systemd/systemd"
+    image: "jam82/molecule-centos:7"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-debian8
-    image: "jam82/debian-molecule:8"
-    command: "/lib/systemd/systemd"
+  - name: git-centos8
+    image: "jam82/molecule-centos:8"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-debian9
-    image: "jam82/debian-molecule:9"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-debian:9"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-debian10
-    image: "jam82/debian-molecule:10"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-debian:10"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-debian
-    image: "jam82/debian-molecule:latest"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-debian:latest"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-suse15
-    image: "jam82/suse-molecule:15"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-opensuse15
+    image: "jam82/molecule-opensuse:15"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: ssh-suse
-    image: "jam82/suse-molecule:latest"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-opensuse
+    image: "jam82/molecule-opensuse:latest"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-suse-tumbleweed
-    image: "jam82/suse-molecule:tumbleweed"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-opensuse-tumbleweed
+    image: "jam82/molecule-opensuse:tumbleweed"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-oracle6
-    image: "jam82/oracle-molecule:6"
-    command: "/sbin/init"
+  - name: git-oraclelinux6
+    image: "jam82/molecule-oraclelinux:6"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
+  - name: git-oraclelinux7
+    image: "jam82/molecule-oraclelinux:7"
+    override_command: False
+    pre_build_image: True
+    privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-oracle7
-    image: "jam82/oracle-molecule:7"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-oraclelinux8
+    image: "jam82/molecule-oraclelinux:8"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-  - name: git-oracle
-    image: "jam82/oracle-molecule:latest"
-    command: "/usr/lib/systemd/systemd"
+  - name: git-oraclelinux
+    image: "jam82/molecule-oraclelinux:latest"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-ubuntu1604
-    image: "jam82/ubuntu-molecule:16.04"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-ubuntu:16.04"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-ubuntu1804
-    image: "jam82/ubuntu-molecule:18.04"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-ubuntu:18.04"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - name: git-ubuntu2004
+    image: "jam82/molecule-ubuntu:20.04"
+    override_command: False
+    pre_build_image: True
+    privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: git-ubuntu
-    image: "jam82/ubuntu-molecule:latest"
-    command: "/lib/systemd/systemd"
+    image: "jam82/molecule-ubuntu:latest"
+    override_command: False
     pre_build_image: True
     privileged: True
+    tmpfs:
+      - /tmp
+      - /run
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
 provisioner:
   name: ansible
   log: True
-  lint:
-    name: ansible-lint
   playbooks:
-    converge: ../shared/playbook.yml
+    prepare: ../resources/playbooks/prepare.yml
+    converge: ../resources/playbooks/converge.yml
   inventory:
     group_vars:
       all:
-        git_enabled: True
-scenario:
-  name: all
-  test_sequence:
-    - lint
-    - destroy
-    - syntax
-    - create
-    - converge
-    - idempotence
-    - verify
-    - destroy
+        git_role_enabled: True
 verifier:
   name: testinfra
   env:
     PYTHONWARNINGS: "ignore"
-  directory: ../tests
+  directory: ../resources/tests
   options:
     v: True
     sudo: True
-  lint:
-    name: flake8
