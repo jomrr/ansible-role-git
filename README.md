@@ -1,5 +1,7 @@
 # ansible-role-git
 
+![GitHub](https://img.shields.io/github/license/jam82/ansible-role-git) [![Build Status](https://travis-ci.org/jam82/ansible-role-git.svg?branch=main)](https://travis-ci.org/jam82/ansible-role-git)
+
 **Ansible role for setting up git with libsecret(keyring) support.**
 
 Support for `git-credential-libsecret` currently only works for:
