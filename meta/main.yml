@@ -3,8 +3,8 @@
 # file: meta/main.yml
 
 galaxy_info:
-  role_name: ansible-role-git
-  author: Jonas Mauer
+  role_name: git
+  author: jam82
   description: Ansible role for setting up git.
   company: ''
 
@@ -14,15 +14,9 @@ galaxy_info:
 
   license: MIT
 
-  min_ansible_version: 2.7
-
-  # If this a Container Enabled role, provide the minimum Ansible Container version.
-  # min_ansible_container_version:
-
-  github_branch: master
+  min_ansible_version: "2.9"
 
   # platforms is a list of platforms, and each platform has a name and a list of versions.
-  #
   platforms:
     - name: Ubuntu
       versions:
@@ -35,4 +29,4 @@ galaxy_info:
 
   galaxy_tags: []
 
-  dependencies: []
+dependencies: []

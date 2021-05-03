@@ -3,8 +3,12 @@
 # file: vars/Archlinux.yml
 
 git_packages:
+  - gcc
   - git
+  - glib2
   - libsecret
+  - make
+  - pkg-config
 
 git_keyring_helper_path: "/usr/share/git/credential/libsecret"
 git_keyring_helper_file: "git-credential-libsecret"

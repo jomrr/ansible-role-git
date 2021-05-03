@@ -7,6 +7,7 @@ git_packages:
   - libsecret-1-0
   - libsecret-1-dev
   - libgnome-keyring-dev
+  - make
 
 git_keyring_helper_path: "/usr/share/doc/git/contrib/credential/gnome-keyring"
 git_keyring_helper_file: "git-credential-gnome-keyring"

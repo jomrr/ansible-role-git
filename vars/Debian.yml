@@ -3,9 +3,11 @@
 # file: vars/Debian.yml
 
 git_packages:
+  - gcc
   - git
   - libsecret-1-0
   - libsecret-1-dev
+  - make
 
 git_keyring_helper_path: "/usr/share/doc/git/contrib/credential/libsecret"
 git_keyring_helper_file: "git-credential-libsecret"
