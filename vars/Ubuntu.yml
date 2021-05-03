@@ -1,0 +1,11 @@
+---
+# role: ansible-role-git
+# file: vars/Ubuntu.yml
+
+git_packages:
+  - git
+  - libsecret-1-0
+  - libsecret-1-dev
+
+git_keyring_helper_path: ""
+git_keyring_helper_file: ""

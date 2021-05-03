@@ -18,33 +18,31 @@ lint: |
   set -e
   yamllint .
   ansible-lint
-  flake8
 platforms:
-  - name: git-arch
+  - name: arch-git
     box: "archlinux/archlinux"
-  - name: git-centos8
+  - name: centos-git
     box: "centos/8"
-  - name: git-debian10
-    box: "debian/buster64"
-  - name: git-fedora31
-    box: "fedora/31-cloud-base"
-  - name: git-ubuntu1804
-    box: "generic/ubuntu1804"
+  - name: debian-git
+    box: "debian/bullseye64"
+  - name: fedora-git
+    box: "fedora/33-cloud-base"
+  - name: opensuse-git
+    box: "generic/opensuse15"
+  - name: oracle-git
+    box: "generic/oracle8"
+  - name: ubuntu-git
+    box: "generic/ubuntu2004"
 provisioner:
   name: ansible
-  log: True
+  log: true
   playbooks:
     prepare: ../resources/playbooks/prepare.yml
     converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
   inventory:
     group_vars:
       all:
-        git_role_enabled: True
+        git_role_enabled: true
 verifier:
-  name: testinfra
-  env:
-    PYTHONWARNINGS: "ignore"
-  directory: ../resources/tests
-  options:
-    v: True
-    sudo: True
+  name: ansible
