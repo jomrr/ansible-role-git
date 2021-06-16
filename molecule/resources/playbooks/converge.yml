@@ -5,7 +5,8 @@
 - name: Converge
   hosts: all
   become: true
+  gather_facts: true
   vars:
     git_role_enabled: true
-  roles:  # to enable required roles put them in requirements.yml and add here
-    - role: '../ansible-role-git'
+  roles:
+    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}"

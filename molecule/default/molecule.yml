@@ -15,102 +15,76 @@ lint: |
 platforms:
   - name: alpine-git
     image: "jam82/molecule-alpine:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-  - name: amazon-git
-    image: "jam82/molecule-amazonlinux:latest"
-    command: ""
-    pre_build_image: true
-    privileged: true
-    tmpfs:
-      - /tmp
-      - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: arch-git
     image: "jam82/molecule-archlinux:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: centos-git
     image: "jam82/molecule-centos:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: debian-git
     image: "jam82/molecule-debian:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: fedora-git
     image: "jam82/molecule-fedora:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: opensuse-git
     image: "jam82/molecule-opensuse:15"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: tumbleweed-git
     image: "jam82/molecule-opensuse:tumbleweed"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: oracle-git
     image: "jam82/molecule-oraclelinux:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - name: ubuntu-git
     image: "jam82/molecule-ubuntu:latest"
-    command: ""
+    command: ~
     pre_build_image: true
     privileged: true
     tmpfs:
       - /tmp
       - /run
-    volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
 provisioner:
   name: ansible
   log: true
