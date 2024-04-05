@@ -4,7 +4,7 @@
 
 galaxy_info:
   role_name: git
-  author: jam82
+  author: jomrr
   description: Ansible role for setting up git.
   company: ''
 
