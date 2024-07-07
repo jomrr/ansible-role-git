@@ -1,5 +1,5 @@
 ---
-# role: ansible-role-git
+# role: jomrr.git
 # file: vars/RedHat.yml
 
 git_packages:

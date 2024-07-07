@@ -1,0 +1,5 @@
+---
+# role: jomrr.git
+# file: meta/requirements.yml
+
+- name: community.general

@@ -1,5 +1,5 @@
 ---
-# role: ansible-role-git
+# role: jomrr.git
 # file: molecule/resources/playbooks/converge.yml
 
 - name: Converge

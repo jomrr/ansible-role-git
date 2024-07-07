@@ -1,5 +1,5 @@
 ---
-# role: ansible-role-git
+# role: jomrr.git
 # file: vars/Archlinux.yml
 
 git_packages:
