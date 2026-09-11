@@ -1,6 +1,0 @@
----
-# role: jomrr.git
-# file: vars/Alpine.yml
-
-git_packages:
-  - git

@@ -1,12 +1,111 @@
 ---
-# role: jomrr.git
+# role: git
 # file: molecule/resources/playbooks/verify.yml
 
-- name: Verify
+- name: GIT | Verify Git and per-user SSH signing
   hosts: all
-  become: true
   gather_facts: false
   tasks:
-    - name: "Assertions"
-      assert:
-        that: true
+    - name: GIT | Exercise system whitespace rules
+      ansible.builtin.command:
+        argv: [git, diff, --no-index, --check, /dev/null, /dev/null]
+      changed_when: false
+
+    - name: GIT | Initialize a repository using the global default branch
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, init, /home/git_molecule/work]
+        creates: /home/git_molecule/work/.git/config
+
+    - name: GIT | Create a commit with automatic SSH signing
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, commit, --allow-empty, -m, Signed by the role]
+        chdir: /home/git_molecule/work
+        creates: /home/git_molecule/work/.git/refs/heads/main
+
+    - name: GIT | Verify the commit signature with the configured trust file
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, verify-commit, HEAD]
+        chdir: /home/git_molecule/work
+      changed_when: false
+
+    - name: GIT | Create a tag with automatic SSH signing
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, tag, -m, Signed tag, molecule-signed]
+        chdir: /home/git_molecule/work
+        creates: /home/git_molecule/work/.git/refs/tags/molecule-signed
+
+    - name: GIT | Verify the tag signature
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, verify-tag, molecule-signed]
+        chdir: /home/git_molecule/work
+      changed_when: false
+
+    - name: GIT | Exercise the system log alias
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, l, '-1']
+        chdir: /home/git_molecule/work
+      changed_when: false
+
+    - name: GIT | Exercise the preserved global alias
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, retained]
+        chdir: /home/git_molecule/work
+      changed_when: false
+
+    - name: GIT | Exercise the removed global alias
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, obsolete]
+        chdir: /home/git_molecule/work
+      changed_when: false
+      failed_when: false
+      register: __git_obsolete
+
+    - name: GIT | Read the signed commit author
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, show, '--format=%an:%ae', --no-patch, HEAD]
+        chdir: /home/git_molecule/work
+      changed_when: false
+      register: __git_author
+
+    - name: GIT | Resolve a URL using the configured subsection
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, ls-remote, --get-url, 'molecule:project']
+      changed_when: false
+      register: __git_url
+
+    - name: GIT | Read the second account identity
+      become: true
+      become_user: git_molecule_other
+      ansible.builtin.command:
+        argv: [git, var, GIT_AUTHOR_IDENT]
+      changed_when: false
+      register: __git_other_identity
+
+    - name: GIT | Assert effective identities and global configuration behavior
+      ansible.builtin.assert:
+        that:
+          - __git_obsolete.rc != 0
+          - __git_author.stdout == 'Git Molecule:git-molecule@example.invalid'
+          - __git_url.stdout == 'https://example.invalid/project'
+          - __git_other_identity.stdout.startswith('Other Git User <other@example.invalid> ')
+        quiet: true

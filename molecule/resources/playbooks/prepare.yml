@@ -1,39 +1,72 @@
 ---
-# role: jomrr.git
+# role: git
 # file: molecule/resources/playbooks/prepare.yml
 
-- name: Prepare
+- name: GIT | Prepare existing users and signing material
   hosts: all
-  become: true
   gather_facts: true
   tasks:
-    - name: "Update apk cache"
-      apk:
-        update_cache: true
-      when: ansible_pkg_mgr == "apk"
+    - name: GIT | Wait for test instances
+      ansible.builtin.wait_for_connection:
+        timeout: 60
 
-    - name: "Update apt cache"
-      apt:
+    - name: GIT | Refresh the apt package cache
+      become: true
+      become_user: root
+      ansible.builtin.apt:
         update_cache: true
-      when: ansible_pkg_mgr == "apt"
+        cache_valid_time: 3600
+      when: ansible_facts.pkg_mgr == 'apt'
 
-    - name: "Update dnf cache"
-      dnf:
-        update_cache: true
-      when: ansible_pkg_mgr == "dnf"
+    - name: GIT | Install the SSH key fixture dependency
+      become: true
+      become_user: root
+      ansible.builtin.package:
+        name: "{{ __git_fixture_packages[ansible_facts.os_family] }}"
+        state: present
+      vars:
+        __git_fixture_packages:
+          Debian: openssh-client
+          RedHat: openssh-clients
+          Suse: openssh
 
-    - name: "Update pacman cache"
-      pacman:
-        update_cache: true
-      when: ansible_pkg_mgr == "pacman"
+    - name: GIT | Create the signing account and disposable key
+      become: true
+      become_user: root
+      ansible.builtin.user:
+        name: git_molecule
+        home: /home/git_molecule
+        create_home: true
+        generate_ssh_key: true
+        ssh_key_type: ed25519
+        ssh_key_file: .ssh/id_ed25519
+      register: __git_fixture_user
 
-    - name: "Update yum cache"
-      yum:
-        update_cache: true
-      when: ansible_pkg_mgr == "yum"
+    - name: GIT | Create a second account
+      become: true
+      become_user: root
+      ansible.builtin.user:
+        name: git_molecule_other
+        home: /home/git_molecule_other
+        create_home: true
 
-    - name: "Update zypper cache"
-      zypper:
-        name: sudo
-        update_cache: true
-      when: ansible_pkg_mgr == "zypper"
+    - name: GIT | Seed existing global settings
+      become: true
+      become_user: git_molecule
+      ansible.builtin.copy:
+        dest: /home/git_molecule/.gitconfig
+        mode: "0600"
+        content: |
+          [user]
+            email = stale@example.invalid
+          [alias]
+            retained = status --short
+            obsolete = status
+
+    - name: GIT | Trust the disposable signing key
+      become: true
+      become_user: git_molecule
+      ansible.builtin.copy:
+        dest: /home/git_molecule/.ssh/allowed_signers
+        mode: "0600"
+        content: "git-molecule@example.invalid {{ __git_fixture_user.ssh_public_key }}\n"

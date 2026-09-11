@@ -1,12 +1,9 @@
 ---
-# role: jomrr.git
+# role: git
 # file: molecule/resources/playbooks/converge.yml
 
-- name: Converge
+- name: "Molecule | converge | git"
   hosts: all
-  become: true
   gather_facts: true
-  vars:
-    git_role_enabled: true
   roles:
-    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+    - role: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"

@@ -1,48 +1,80 @@
 ---
-# role: jomrr.git
+# role: git
 # file: tasks/main.yml
 
-- name: "Set os_family dependent variables"
-  ansible.builtin.include_vars: '{{ ansible_os_family }}.yml'
+- name: GIT | Keep signing settings under the explicit SSH signing interface
+  ansible.builtin.assert:
+    that:
+      - __git_config_name | lower not in ['gpg.format', 'user.signingkey', 'commit.gpgsign', 'tag.gpgsign']
+    quiet: true
+    fail_msg: Use git_ssh_signing with an explicit key for signing settings.
+  loop: "{{ (git_system_config.keys() | list) + (git_user_config | map(attribute='name') | list) }}"
+  loop_control:
+    loop_var: __git_config_name
+    label: "{{ __git_config_name }}"
 
-- name: "Set distribution dependent variables"
-  ansible.builtin.include_vars: "{{ item }}"
+- name: GIT | Load platform variables
+  ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', __git_platform_files) }}"
   vars:
-    params:
+    __git_platform_files:
       files:
-        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
-        - '{{ ansible_distribution }}.yml'
-        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
-        - '{{ ansible_os_family }}.yml'
+        - "{{ ansible_facts.distribution }}-{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.distribution }}.yml"
+        - "{{ ansible_facts.os_family }}.yml"
       paths:
-        - 'vars'
-  loop: "{{ query('first_found', params) }}"
+        - "{{ role_path }}/vars"
 
-- name: "Install packages for ansible-role-git"
+- name: GIT | Install Git and platform dependencies
+  become: true
+  become_user: root
   ansible.builtin.package:
-    name: "{{ git_packages }}"
+    name: "{{ __git_packages + (__git_keyring_packages if git_keyring_enabled else []) }}"
     state: present
+  register: __git_install
 
-- name: "Make gnome-keyring-support"
-  ansible.builtin.shell: set -o pipefail && sudo make
-  args:
-    chdir: "{{ git_keyring_helper_path }}/"
-    creates: "{{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}"
-    executable: /bin/bash
-  when: not ansible_distribution == 'RedHat'
-    and git_keyring_helper_file | default('') | length > 0
+- name: GIT | Build the platform credential helper
+  become: true
+  become_user: root
+  community.general.make:
+    chdir: "{{ __git_keyring_helper | dirname }}"
+    target: "{{ __git_keyring_helper | basename }}"
+  when:
+    - git_keyring_enabled
+    - __git_keyring_build
+    - not (ansible_check_mode and __git_install.changed)
 
-- name: "Set permissions for gnome-keyring-support"
-  ansible.builtin.file:
-    path: "{{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}"
-    mode: '755'
-    modification_time: preserve
-    access_time: preserve
-  when: git_keyring_helper_file | default('') | length > 0
-
-- name: "Configure git system settings"
-  become: false
+- name: GIT | Configure system settings
+  become: true
+  become_user: root
   ansible.builtin.template:
-    src: "etc/gitconfig.j2"
-    dest: "/etc/gitconfig"
-    mode: '644'
+    src: etc/gitconfig.j2
+    dest: /etc/gitconfig
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+    validate: "{{ __git_validate_command }}"
+
+- name: GIT | Configure global settings as their owner
+  become: true
+  become_user: "{{ __git_setting.user }}"
+  community.general.git_config:
+    scope: global
+    name: "{{ __git_setting.name }}"
+    value: "{{ __git_setting.value | default(omit) }}"
+    state: "{{ __git_setting.state | default(omit) }}"
+    add_mode: "{{ __git_setting.add_mode | default(omit) }}"
+  loop: "{{ git_user_config }}"
+  loop_control:
+    loop_var: __git_setting
+    label: "{{ __git_setting.user }}: {{ __git_setting.name }}"
+  no_log: "{{ __git_setting.no_log | default(git_config_no_log) }}"
+  when: not (ansible_check_mode and __git_install.changed)
+
+- name: GIT | Configure SSH signing for each account
+  ansible.builtin.include_tasks: signing.yml
+  loop: "{{ git_ssh_signing }}"
+  loop_control:
+    loop_var: __git_signer
+    label: "{{ __git_signer.user }}"
+  when: not (ansible_check_mode and __git_install.changed)

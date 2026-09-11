@@ -1,0 +1,55 @@
+---
+# role: git
+# file: defaults/main.yml
+
+# Enable the platform credential helper on Debian.
+git_keyring_enabled: true
+
+# Complete system configuration, keyed by Git configuration names; values are strings.
+git_system_config:
+  core.excludesfile: ~/.gitignore
+  core.autocrlf: input
+  core.whitespace: trailing-space,space-before-tab,tab-in-indent,cr-at-eol
+  color.branch: auto
+  color.diff: auto
+  color.interactive: auto
+  color.status: auto
+  push.default: simple
+  alias.a: add .
+  alias.c: commit
+  alias.ca: commit -a
+  alias.cm: commit -m
+  alias.cam: commit -am
+  alias.d: diff
+  alias.dc: diff --cached
+  alias.l: log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
+  alias.p: push
+# Example: git_system_config: {core.editor: vi, init.defaultBranch: main}
+
+# Suppress configuration task output when entries contain credentials.
+git_config_no_log: false
+
+# Sign commits for accounts listed in git_ssh_signing unless overridden per account.
+git_sign_commits: true
+
+# Sign tags for accounts listed in git_ssh_signing unless overridden per account.
+git_sign_tags: true
+
+# SSH signing accounts with a mandatory, explicitly supplied Git signing-key string.
+git_ssh_signing: []
+# - user: alice
+#   key: "key::ssh-ed25519 AAAA... alice@example.org"
+#   sign_tags: false
+
+# Global settings applied as each existing user; unlisted settings are preserved.
+git_user_config: []
+# - user: alice
+#   name: user.email
+#   value: alice@example.org
+# - user: alice
+#   name: alias.old
+#   state: absent
+# - user: alice
+#   name: http.extraHeader
+#   value: "{{ vaulted_git_header }}"
+#   no_log: true

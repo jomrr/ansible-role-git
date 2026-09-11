@@ -1,13 +1,17 @@
 ---
-# role: jomrr.git
+# role: git
 # file: vars/Debian.yml
 
-git_packages:
-  - gcc
+__git_packages:
   - git
-  - libsecret-1-0
+  - openssh-client
+__git_keyring_packages:
+  - gcc
+  - libc6-dev
   - libsecret-1-dev
   - make
-
-git_keyring_helper_path: "/usr/share/doc/git/contrib/credential/libsecret"
-git_keyring_helper_file: "git-credential-libsecret"
+  - pkg-config
+__git_keyring_helper: /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+__git_keyring_build: true
+__git_validate_command: git config --file %s --list
+__git_keyring_supported: true

@@ -1,11 +1,12 @@
 ---
-# role: jomrr.git
+# role: git
 # file: vars/Ubuntu.yml
 
-git_packages:
+__git_packages:
   - git
-  - libsecret-1-0
-  - libsecret-1-dev
-
-git_keyring_helper_path: ""
-git_keyring_helper_file: ""
+  - openssh-client
+__git_keyring_packages: []
+__git_keyring_helper: ''
+__git_keyring_build: false
+__git_validate_command: git config --file %s --list
+__git_keyring_supported: false

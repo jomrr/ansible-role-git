@@ -1,0 +1,142 @@
+---
+# role: git
+# file: meta/argument_specs.yml
+
+argument_specs:
+  main:
+    short_description: Install Git and manage system and per-user configuration, including
+      SSH signing.
+    options:
+      git_keyring_enabled:
+        type: bool
+        default: true
+        description:
+          - Enable the libsecret credential helper on Debian, built from the sources shipped
+            with Git.
+      git_system_config:
+        type: dict
+        default:
+          core.excludesfile: ~/.gitignore
+          core.autocrlf: input
+          core.whitespace: trailing-space,space-before-tab,tab-in-indent,cr-at-eol
+          color.branch: auto
+          color.diff: auto
+          color.interactive: auto
+          color.status: auto
+          push.default: simple
+          alias.a: add .
+          alias.c: commit
+          alias.ca: commit -a
+          alias.cm: commit -m
+          alias.cam: commit -am
+          alias.d: diff
+          alias.dc: diff --cached
+          alias.l: log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)
+            %C(bold blue)<%an>%Creset" --abbrev-commit
+          alias.p: push
+        description:
+          - Complete /etc/gitconfig contents, mapped from Git configuration names to string
+            values.
+          - Unlisted system settings are removed. The platform credential helper is appended
+            when enabled.
+          - Values are public; credentials belong in per-user settings protected by no_log.
+      git_config_no_log:
+        type: bool
+        default: false
+        description:
+          - Default output redaction policy for global configuration entries.
+          - Set no_log on individual entries containing credentials.
+      git_user_config:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - Global Git settings applied with become as each named, existing user.
+          - Unlisted settings are preserved. Git resolves the user global configuration
+            file.
+          - Signing format, key and commit/tag policies belong in git_ssh_signing; other
+            Git settings, including gpg.ssh.allowedSignersFile, are accepted here.
+          - Each setting has one writer. Do not mix add and replace-all for the same user
+            and name.
+        required_if:
+          - - state
+            - present
+            - - value
+        options:
+          user:
+            type: str
+            required: true
+            description:
+              - Existing account owning the global configuration; its home directory must
+                exist.
+          name:
+            type: str
+            required: true
+            description:
+              - Git configuration name, including section and optional subsection.
+          value:
+            type: str
+            description:
+              - Nonempty string required for state=present. Quote boolean and numeric values.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            default: present
+            description:
+              - Set the value or remove every value for this name.
+          add_mode:
+            type: str
+            choices:
+              - replace-all
+              - add
+            default: replace-all
+            description:
+              - Replace existing values or add a value to a multivalued setting.
+          no_log:
+            type: bool
+            description:
+              - Override git_config_no_log for this entry when its value is sensitive.
+      git_sign_commits:
+        type: bool
+        default: true
+        description:
+          - Default automatic commit-signing policy for accounts in git_ssh_signing.
+      git_sign_tags:
+        type: bool
+        default: true
+        description:
+          - Default automatic tag-signing policy for accounts in git_ssh_signing.
+      git_ssh_signing:
+        type: list
+        elements: dict
+        default: []
+        description:
+          - Configure SSH signing for existing accounts with a mandatory explicit signing-key
+            string.
+          - The role never discovers keys or configures gpg.ssh.defaultKeyCommand.
+          - Signing settings are managed exclusively here, rather than through git_user_config
+            or git_system_config.
+        options:
+          user:
+            type: str
+            required: true
+            description:
+              - Existing account whose global SSH-signing configuration is managed.
+          key:
+            type: str
+            required: true
+            description:
+              - Explicit Git SSH signing-key string, passed unchanged to user.signingkey;
+                no automatic key selection.
+              - 'Use key:: followed by the public SSH key when the matching private key
+                is available in an SSH agent, or an explicit key path.'
+          sign_commits:
+            type: bool
+            description:
+              - Override git_sign_commits for this account.
+          sign_tags:
+            type: bool
+            description:
+              - Override git_sign_tags for this account.

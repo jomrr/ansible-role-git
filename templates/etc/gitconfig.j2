@@ -1,26 +1,10 @@
-[core]
-  editor = nvim
-  excludesfile = ~/.gitignore
-  autocrlf = input
-  whitespace = trailing-space,space-before-tab,indent-with-non-tab,tab-in-indent,cr-at-eol
-[color]
-  branch = auto
-  diff = auto
-  interactive = auto
-  status = auto
-{% if git_keyring_helper_file | default('') | length > 0 %}
+# Managed by ansible.
+# file: {{ template_destpath }}
+{% for __git_name, __git_value in git_system_config.items() %}
+[{{ __git_name.split('.')[0] }}{% if __git_name.split('.') | length > 2 %} {{ __git_name.split('.')[1:-1] | join('.') | to_json(ensure_ascii=false) }}{% endif %}]
+  {{ __git_name.split('.')[-1] }} = {{ __git_value | string | to_json(ensure_ascii=false) }}
+{% endfor %}
+{% if git_keyring_enabled and __git_keyring_supported %}
 [credential]
-  helper = {{ git_keyring_helper_path }}/{{ git_keyring_helper_file }}
+  helper = {{ __git_keyring_helper | to_json }}
 {% endif %}
-[push]
-  default = simple
-[alias]
-  a   = add .
-  c   = commit
-  ca  = commit -a
-  cm  = commit -m
-  cam = commit -am
-  d   = diff
-  dc  = diff --cached
-  l   = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
-  p   = push
