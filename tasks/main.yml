@@ -2,17 +2,6 @@
 # role: git
 # file: tasks/main.yml
 
-- name: GIT | Keep signing settings under the explicit SSH signing interface
-  ansible.builtin.assert:
-    that:
-      - __git_config_name | lower not in ['gpg.format', 'user.signingkey', 'commit.gpgsign', 'tag.gpgsign']
-    quiet: true
-    fail_msg: Use git_ssh_signing with an explicit key for signing settings.
-  loop: "{{ (git_system_config.keys() | list) + (git_user_config | map(attribute='name') | list) }}"
-  loop_control:
-    loop_var: __git_config_name
-    label: "{{ __git_config_name }}"
-
 - name: GIT | Load platform variables
   ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', __git_platform_files) }}"
   vars:
@@ -46,35 +35,30 @@
 - name: GIT | Configure system settings
   become: true
   become_user: root
-  ansible.builtin.template:
-    src: etc/gitconfig.j2
-    dest: /etc/gitconfig
-    owner: root
-    group: root
-    mode: "0644"
-    backup: true
-    validate: "{{ __git_validate_command }}"
-
-- name: GIT | Configure global settings as their owner
-  become: true
-  become_user: "{{ __git_setting.user }}"
   community.general.git_config:
-    scope: global
-    name: "{{ __git_setting.name }}"
-    value: "{{ __git_setting.value | default(omit) }}"
-    state: "{{ __git_setting.state | default(omit) }}"
-    add_mode: "{{ __git_setting.add_mode | default(omit) }}"
-  loop: "{{ git_user_config }}"
+    scope: system
+    name: "{{ __git_setting.key }}"
+    value: "{{ __git_setting.value }}"
+    state: "{{ 'absent' if __git_setting.value is none else 'present' }}"
+  loop: "{{ __git_system_settings | dict2items }}"
   loop_control:
     loop_var: __git_setting
-    label: "{{ __git_setting.user }}: {{ __git_setting.name }}"
-  no_log: "{{ __git_setting.no_log | default(git_config_no_log) }}"
+    label: "{{ __git_setting.key }}"
+  vars:
+    __git_system_settings: >-
+      {{ {'credential.helper': __git_keyring_helper if git_keyring_enabled and __git_keyring_supported else none}
+         | combine(git_system_config) }}
   when: not (ansible_check_mode and __git_install.changed)
 
-- name: GIT | Configure SSH signing for each account
-  ansible.builtin.include_tasks: signing.yml
-  loop: "{{ git_ssh_signing }}"
+- name: GIT | Configure each account
+  ansible.builtin.include_tasks: user.yml
+  loop: "{{ git_user_config | map(attribute='user') }}"
   loop_control:
-    loop_var: __git_signer
-    label: "{{ __git_signer.user }}"
+    loop_var: __git_user_name
+    label: "{{ __git_user_name }}"
+  vars:
+    __git_user: "{{ git_user_config | selectattr('user', 'equalto', __git_user_name) | first }}"
+    __git_user_settings: >-
+      {{ (__git_user.config | default({}))
+         | combine({'user.name': __git_user.name, 'user.email': __git_user.email}) }}
   when: not (ansible_check_mode and __git_install.changed)

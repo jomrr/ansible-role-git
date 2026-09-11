@@ -8,5 +8,4 @@ __git_packages:
 __git_keyring_packages: []
 __git_keyring_helper: ''
 __git_keyring_build: false
-__git_validate_command: git config --file %s --list
 __git_keyring_supported: false

@@ -10,35 +10,38 @@ Install Git and manage system and per-user configuration, including SSH signing.
 
 ## Purpose
 
-Install Git and its SSH client, deploy a validated system configuration, and
-manage selected global settings as existing users. The role is idempotent.
+Install Git and its SSH client, manage system settings with
+community.general.git_config, and configure global identity and settings as
+existing users. The role is idempotent.
 
 ## Scope
 
 ### Managed
 
-- Git and SSH client packages, the complete /etc/gitconfig, and explicitly
-  listed per-user global settings.
+- Git and SSH client packages, selected system settings, and global
+  configuration for accounts in git_user_config.
 - The libsecret credential helper on Debian when git_keyring_enabled is true.
-- SSH commit and tag signing for accounts in git_ssh_signing, with an explicitly
-  supplied key string.
+- Required author name and email, additional settings, and explicit SSH-signing
+  configuration for each managed account.
 
 ### Not Managed
 
 - User accounts, home directories, repositories, private signing keys, SSH
   agents, and Secret Service sessions.
-- Global settings omitted from git_user_config and all repository-local
-  settings.
+- Unlisted system and global settings, apart from the platform credential
+  helper, and all repository-local settings.
 
 ## Requirements
 
 - Configured accounts and their home directories must already exist. The
   connection must support become to root and to those accounts.
+- Each git_user_config entry requires user (the operating-system account), name
+  (the Git author name), and email.
 - SSH signing requires Git 2.34 or later and OpenSSH 8.0 or later. The tested
   latest platform images provide these versions.
-- Every SSH-signing account requires an explicit key string. A key:: public-key
-  string requires the matching private key in an accessible SSH agent; an
-  explicit key path must be readable by the account.
+- Every SSH-signing account requires an explicit user.signingkey string in
+  config. A key:: public-key string requires the matching private key in an
+  accessible SSH agent; an explicit key path must be readable by the account.
 - Signature verification requires an existing allowed-signers file and
   gpg.ssh.allowedSignersFile. Signing alone does not require that file.
 - The credential helper requires an existing user Secret Service session to
@@ -71,10 +74,10 @@ git_keyring_enabled: true
 
 Type: `dict`. Required: `false`.
 
-Complete /etc/gitconfig contents, mapped from Git configuration names to string
-values.
-Unlisted system settings are removed. The platform credential helper is appended
-when enabled.
+Managed system Git settings, mapped from full configuration names to nonempty
+string values or null for removal.
+Unlisted settings are preserved. Explicit credential.helper overrides the
+platform helper setting.
 Values are public; credentials belong in per-user settings protected by no_log.
 
 Default:
@@ -105,8 +108,8 @@ git_system_config:
 
 Type: `bool`. Required: `false`.
 
-Default output redaction policy for global configuration entries.
-Set no_log on individual entries containing credentials.
+Default output redaction policy for global configuration tasks.
+Set no_log on individual accounts whose configuration contains sensitive values.
 
 Default:
 
@@ -118,13 +121,10 @@ git_config_no_log: false
 
 Type: `list`. Required: `false`.
 
-Global Git settings applied with become as each named, existing user.
+Global Git configuration applied with become as each named, existing user.
+Each account requires its Git author name and email; list each account once.
 Unlisted settings are preserved. Git resolves the user global configuration
 file.
-Signing format, key and commit/tag policies belong in git_ssh_signing; other Git
-settings, including gpg.ssh.allowedSignersFile, are accepted here.
-Each setting has one writer. Do not mix add and replace-all for the same user
-and name.
 
 Default:
 
@@ -132,61 +132,22 @@ Default:
 git_user_config: []
 ```
 
-### `git_sign_commits`
-
-Type: `bool`. Required: `false`.
-
-Default automatic commit-signing policy for accounts in git_ssh_signing.
-
-Default:
-
-```yaml
-git_sign_commits: true
-```
-
-### `git_sign_tags`
-
-Type: `bool`. Required: `false`.
-
-Default automatic tag-signing policy for accounts in git_ssh_signing.
-
-Default:
-
-```yaml
-git_sign_tags: true
-```
-
-### `git_ssh_signing`
-
-Type: `list`. Required: `false`.
-
-Configure SSH signing for existing accounts with a mandatory explicit
-signing-key string.
-The role never discovers keys or configures gpg.ssh.defaultKeyCommand.
-Signing settings are managed exclusively here, rather than through
-git_user_config or git_system_config.
-
-Default:
-
-```yaml
-git_ssh_signing: []
-```
-
 ## Managed Files
 
-- `/etc/gitconfig` Fully managed, root-owned, mode 0644, syntax-validated before
-  replacement, with module-provided backups.
-- `~/.gitconfig or $XDG_CONFIG_HOME/git/config` Git chooses the global file for
-  the become user; only explicitly listed keys are changed through git config.
+- `/etc/gitconfig` Selected keys are managed with community.general.git_config
+  at system scope. Unlisted settings are preserved.
+- `~/.gitconfig or $XDG_CONFIG_HOME/git/config` The same module manages global
+  settings as their owner. Git chooses the configuration file for the become
+  user.
 
 ## Check Mode
 
-Supported, including first installation. System configuration changes are
-predicted without writing files.
+Supported, including first installation, through native module change
+predictions.
 
 - When package installation is predicted to change the host, helper compilation
-  and global settings are deferred because Git or its build prerequisites may
-  not exist yet.
+  and configuration tasks are deferred because Git or its build prerequisites
+  may not exist yet.
 - With prerequisites installed, the make and git_config modules report their
   native change predictions.
 
@@ -196,35 +157,35 @@ No daemon restart or handler is needed; Git reads configuration when invoked.
 
 ## Security Notes
 
-- System configuration is public. Mark global entries containing credentials
-  with no_log: true, or set git_config_no_log for a configuration consisting of
-  sensitive entries.
+- System configuration is public. Set no_log: true for accounts whose config
+  contains credentials, or use git_config_no_log for the default redaction
+  policy.
 - The role references signing keys and never reads or distributes private-key
-  contents.
+  contents. It never discovers keys or sets gpg.ssh.defaultKeyCommand.
 
 ## Operational Notes
 
 - Set git_keyring_enabled: false to omit the managed Debian helper. Ubuntu, Red
-  Hat and SUSE do not enable a helper by default.
+  Hat and SUSE do not enable a helper by default. An explicit credential.helper
+  in git_system_config takes precedence.
 - Debian builds the helper shipped with Git using community.general.make.
   Supported platforms are exactly the generator repository default platforms.
 - No editor is forced by default. core.editor may be set to an editor already
   installed on the host.
-- git_system_config accepts full Git names, including case-sensitive subsections
-  such as `url.https://example.org/.insteadOf`. Quote boolean and numeric
-  values.
-- git_user_config entries require user and name. state defaults to present and
-  requires a nonempty string value; state: absent removes the key. add_mode: add
-  manages multiple values without replacing other values.
-- Give each user/key one intended state; do not mix add and replace-all for the
-  same key. Removing an entry stops managing it; use state: absent to remove its
-  value.
-- Native git config validates syntax but does not reject every conflicting
-  semantic option. Functional tests exercise git diff as well as signed commits
-  and tags.
-- gpg.format, user.signingkey, commit.gpgsign and tag.gpgsign are owned by
-  git_ssh_signing. Configure their policies there to guarantee an explicit
-  signing key and avoid competing writers.
+- git_system_config and each account config accept full Git names, including
+  case-sensitive subsections such as `url.https://example.org/.insteadOf`. Quote
+  boolean and numeric values.
+- Each account name and email set user.name and user.email and take precedence
+  over config. An empty git_user_config list leaves user identities unmanaged.
+- String values replace all existing values for a key; null removes the key.
+  Removing a key from the mapping stops managing it and leaves its current value
+  intact.
+- SSH signing uses ordinary config keys: gpg.format, user.signingkey,
+  commit.gpgsign, and tag.gpgsign. The role requires an explicit key when
+  gpg.format is ssh; it does not select a key or enable signing implicitly.
+- Native git config validates configuration syntax. Functional tests exercise
+  git diff, effective identities, preserved settings, and signed commits and
+  tags.
 
 ## Supported Platforms
 
@@ -252,6 +213,23 @@ Install Git with the default system settings.
     - role: jomrr.git
 ```
 
+### Global identity
+
+Set the required Git identity for an existing account.
+
+```yaml
+---
+- name: GIT | Configure a developer identity
+  hosts: workstations
+  gather_facts: true
+  roles:
+    - role: jomrr.git
+      git_user_config:
+        - user: alice
+          name: Alice Example
+          email: alice@example.org
+```
+
 ### Global settings and SSH signing
 
 Configure an existing account with an explicit signing key.
@@ -263,17 +241,19 @@ Configure an existing account with an explicit signing key.
   gather_facts: true
   roles:
     - role: jomrr.git
-      git_ssh_signing:
-        - user: alice
-          key: /home/alice/.ssh/id_ed25519
       git_user_config:
-        - {user: alice, name: user.name, value: Alice Example}
-        - {user: alice, name: user.email, value: alice@example.org}
-        - {user: alice, name: init.defaultBranch, value: main}
         - user: alice
-          name: gpg.ssh.allowedSignersFile
-          value: /home/alice/.ssh/allowed_signers
-        - {user: alice, name: alias.old, state: absent}
+          name: Alice Example
+          email: alice@example.org
+          config:
+            init.defaultBranch: main
+            gpg.format: ssh
+            user.signingkey: /home/alice/.ssh/id_ed25519
+            commit.gpgsign: "true"
+            tag.gpgsign: "true"
+            gpg.ssh.allowedSignersFile: /home/alice/.ssh/allowed_signers
+            alias.old: null
+          no_log: false
 ```
 
 ## References
@@ -289,4 +269,4 @@ Configure an existing account with an explicit signing key.
 This project is licensed under the MIT License.
 See [LICENSE](LICENSE) for the full license text.
 
-Copyright (c) 2019 Jonas Mauer.
+Copyright (c) 2019-2026 Jonas Mauer.

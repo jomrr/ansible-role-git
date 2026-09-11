@@ -1,0 +1,30 @@
+---
+# role: git
+# file: tasks/user.yml
+
+- name: GIT | Require an explicit key for SSH signing
+  ansible.builtin.assert:
+    that:
+      - >-
+        __git_normalized_config.get('gpg.format') != 'ssh' or
+        (__git_normalized_config.get('user.signingkey') is string and
+         __git_normalized_config.get('user.signingkey') | trim | length > 0)
+    quiet: true
+    fail_msg: "SSH signing for {{ __git_user.user }} requires an explicit user.signingkey string in config."
+  vars:
+    __git_normalized_config: >-
+      {{ dict(__git_user_settings.keys() | map('lower') | zip(__git_user_settings.values())) }}
+
+- name: GIT | Configure global settings as their owner
+  become: true
+  become_user: "{{ __git_user.user }}"
+  community.general.git_config:
+    scope: global
+    name: "{{ __git_setting.key }}"
+    value: "{{ __git_setting.value }}"
+    state: "{{ 'absent' if __git_setting.value is none else 'present' }}"
+  loop: "{{ __git_user_settings | dict2items }}"
+  loop_control:
+    loop_var: __git_setting
+    label: "{{ __git_user.user }}: {{ __git_setting.key }}"
+  no_log: "{{ __git_user.no_log | default(git_config_no_log) }}"

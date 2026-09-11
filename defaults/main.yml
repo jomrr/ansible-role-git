@@ -5,7 +5,7 @@
 # Enable the platform credential helper on Debian.
 git_keyring_enabled: true
 
-# Complete system configuration, keyed by Git configuration names; values are strings.
+# Managed system settings; string values set keys and null removes them.
 git_system_config:
   core.excludesfile: ~/.gitignore
   core.autocrlf: input
@@ -26,30 +26,21 @@ git_system_config:
   alias.p: push
 # Example: git_system_config: {core.editor: vi, init.defaultBranch: main}
 
-# Suppress configuration task output when entries contain credentials.
+# Suppress global configuration output when accounts contain sensitive settings.
 git_config_no_log: false
 
-# Sign commits for accounts listed in git_ssh_signing unless overridden per account.
-git_sign_commits: true
-
-# Sign tags for accounts listed in git_ssh_signing unless overridden per account.
-git_sign_tags: true
-
-# SSH signing accounts with a mandatory, explicitly supplied Git signing-key string.
-git_ssh_signing: []
-# - user: alice
-#   key: "key::ssh-ed25519 AAAA... alice@example.org"
-#   sign_tags: false
-
-# Global settings applied as each existing user; unlisted settings are preserved.
+# Global configuration for existing users, with mandatory Git name and email.
 git_user_config: []
 # - user: alice
-#   name: user.email
-#   value: alice@example.org
-# - user: alice
-#   name: alias.old
-#   state: absent
-# - user: alice
-#   name: http.extraHeader
-#   value: "{{ vaulted_git_header }}"
-#   no_log: true
+#   name: Alice Example
+#   email: alice@example.org
+#   config:
+#     init.defaultBranch: main
+#     gpg.format: ssh
+#     user.signingkey: /home/alice/.ssh/id_ed25519
+#     commit.gpgsign: "true"
+#     tag.gpgsign: "true"
+#     alias.old: null
+#   no_log: false
+# An inline public key is also accepted: "key::ssh-ed25519 AAAA... alice@example.org".
+# config defaults to {}; no_log defaults to git_config_no_log.

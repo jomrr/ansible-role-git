@@ -58,6 +58,14 @@
         chdir: /home/git_molecule/work
       changed_when: false
 
+    - name: GIT | Exercise the preserved system alias
+      become: true
+      become_user: git_molecule
+      ansible.builtin.command:
+        argv: [git, system-retained]
+        chdir: /home/git_molecule/work
+      changed_when: false
+
     - name: GIT | Exercise the preserved global alias
       become: true
       become_user: git_molecule

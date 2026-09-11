@@ -13,5 +13,4 @@ __git_keyring_packages:
   - pkg-config
 __git_keyring_helper: /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 __git_keyring_build: true
-__git_validate_command: git config --file %s --list
 __git_keyring_supported: true

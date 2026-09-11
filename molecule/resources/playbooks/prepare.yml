@@ -50,6 +50,18 @@
         home: /home/git_molecule_other
         create_home: true
 
+    - name: GIT | Seed existing system settings
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        dest: /etc/gitconfig
+        mode: "0644"
+        content: |
+          [core]
+            whitespace = indent-with-non-tab,tab-in-indent
+          [alias]
+            system-retained = status --short
+
     - name: GIT | Seed existing global settings
       become: true
       become_user: git_molecule
