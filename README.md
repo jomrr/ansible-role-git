@@ -3,8 +3,8 @@
 ![GitHub](https://img.shields.io/github/license/jomrr/ansible-role-git)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jomrr/ansible-role-git)
 ![GitHub issues](https://img.shields.io/github/issues-raw/jomrr/ansible-role-git)
-[![dev](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-git/dev.yml?branch=dev&event=push&label=dev)](https://github.com/jomrr/ansible-role-git/actions/workflows/dev.yml?query=branch%3Adev)
-[![main](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-git/main.yml?branch=main&event=push&label=main)](https://github.com/jomrr/ansible-role-git/actions/workflows/main.yml?query=branch%3Amain)
+[![dev](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-git/dev.yml?branch=dev&label=dev)](https://github.com/jomrr/ansible-role-git/actions/workflows/dev.yml?query=branch%3Adev)
+[![main](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-git/main.yml?branch=main&label=main)](https://github.com/jomrr/ansible-role-git/actions/workflows/main.yml?query=branch%3Amain)
 
 Install Git and manage system and per-user configuration, including SSH signing.
 
